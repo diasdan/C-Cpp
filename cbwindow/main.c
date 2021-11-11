@@ -1,3 +1,9 @@
+#if defined(UNICODE) && !defined(_UNICODE)
+	#define_UNICODE
+#elif defined(_UNICODE) && !defined(UNICODE)
+	#define UNICODE
+#endif	
+	
 #include <windows.h>
 #include <stdio.h>
 
