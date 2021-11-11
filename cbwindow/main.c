@@ -3,86 +3,84 @@
 #elif defined(_UNICODE) && !defined(UNICODE)
 	#define UNICODE
 #endif	
-	
+
+/* Um esqueleto mínimo Windows */
+
 #include <windows.h>
 #include <stdio.h>
 
+LRESULT CALLBACK WindowFunc(HWND, UINT, WPARAM, LPARAM);
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+char szWinName[] = "Janela";
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpszArgs, int nWinMode)
 {
-    switch(uMsg)
-    {
-    case WM_SETFOCUS:
-       printf( "WM_SETFOCUS\n" );
-       return 0;
 
-    case WM_ACTIVATE:
-        printf( "WM_ACTIVATE\n" );
-        return 0;
+    HWND hwnd;
+    MSG msg;
+    WNDCLASS wcl;
 
-    case WM_CREATE:
-        printf( "WM_CREATE\n" );
-        return 0;
+    /* Define uma classe de janela */
+    wcl.hInstance = hInstance; /* handle desta instância */
+    wcl.lpszClassName = szWinName; /* Nome da classe de janela */
+    wcl.lpfnWndProc = WindowFunc; /* função de janela */
+    wcl.style = 0; /* estilo padrão */
 
-    case WM_PAINT:
-        //printf( "WM_PAINT\n" );
-        return 0;
+    wcl.hIcon = LoadIcon(NULL, IDI_APPLICATION); /* estilo de ícone */
 
-    case WM_DESTROY:
-        printf( "WM_DESTROY\n" );
-        PostQuitMessage(0);
-        return 0;
-    }
-    return DefWindowProc(hwnd, uMsg, wParam, lParam);
-}
+    wcl.hCursor = LoadCursor(NULL, IDC_ARROW); /* estilo de cursor */
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
-{
-    const char * CLASS_NAME = TEXT("CLASSE_WINDOWS");
+    wcl.lpszMenuName = NULL; /* sem menu */
 
-    WNDCLASS wc = { };
+    wcl.cbClsExtra = 0; /* nenhuma informação */
+    wcl.cbWndExtra = 0; /*extra é necessária*/
 
-    wc.lpfnWndProc = WindowProc;
-    wc.hInstance = hInstance;
-    wc.lpszClassName = CLASS_NAME;
+    /* Registra a classe de janela */
+    if (!RegisterClass(&wcl)) return 0;
 
-    RegisterClass(&wc);
+    /* Com a classe janela registrada, pode ser criada uma janela */
+    hwnd = CreateWindow(
+        szWinName, /* nome da classe da janela */
+        "Janela", /* título */
+        WS_OVERLAPPEDWINDOW, /* estilo da janela - normal */
+        CW_USEDEFAULT, /* coordenada X - deixe o Windows decidir */
+        CW_USEDEFAULT, /* coordenada Y - deixe o Windows decidir */
+        CW_USEDEFAULT, /* largura - deixe o Windows decidir */
+        CW_USEDEFAULT, /* altura - deixe o Windows decidir */
+        HWND_DESKTOP, /* nenhuma janela-pai */
+        NULL, /* sem menu */
+        hInstance, /* handle desta instâncias do programas */
+        NULL /* nenhum argumento adcional */
+    );
 
-    //Cria a Janela
 
-    HWND hwnd = CreateWindowEx(
-        0,                      // Estilos de Janela Opcionais
-        CLASS_NAME,
-        TEXT("CO-mpanion Beta 1.0"),
-        WS_OVERLAPPEDWINDOW,
+    /* Exibe a janela */
+    ShowWindow(hwnd, nWinMode);
+    UpdateWindow(hwnd);
 
-        // Tamanho e posição
-
-        CW_USEDEFAULT, // x
-        CW_USEDEFAULT, // y
-        CW_USEDEFAULT, // width
-        CW_USEDEFAULT, // height
-        NULL, //janela pai
-        NULL, //menu
-        hInstance, //instance Handler
-        NULL
-        );
-
-    if (hwnd == NULL)
-    {
-        return 0;
-    }
-
-    ShowWindow(hwnd, nCmdShow);
-
-    // Run the message loop
-
-    MSG msg = { };
-
+    /* Cria a repetição de mensagens */
     while(GetMessage(&msg, NULL, 0, 0))
     {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
+        TranslateMessage(&msg); /* permite uso do teclado */
+        DispatchMessage(&msg); /* retorna o controle ao Windows */
     }
-    return 0;
+    return msg.wParam;
 }
+
+    /* Esta função é chamada pelo Windows e recebe mensagens
+        da fila de mensagens */
+
+    LRESULT CALLBACK WindowFunc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+    {
+        switch (message) {
+            case WM_DESTROY: /* encerra o programa */
+                PostQuitMessage(0);
+                break;
+            default:
+                /* Deixe o Windows processar quaisquer mensagens
+                    não especificadas no comando switch acima */
+                return DefWindowProc(hwnd, message, wParam, lParam);
+        }
+        return 0;
+    }
+
