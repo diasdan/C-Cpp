@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1636647164 source:c:\users\danilo\documents\c c++\c c++\c\testes\cbwindow\main.c
+	<windows.h>
+	<stdio.h>
+
