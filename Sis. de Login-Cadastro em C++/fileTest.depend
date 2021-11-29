@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1638199778 source:c:Sis. de Login-Cadastro em C++\main.cpp
+	<iostream>
+	<fstream>
+
